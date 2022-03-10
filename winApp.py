@@ -873,11 +873,15 @@ class webcam(tk.Toplevel):
                     is_true, frame, faces = self.vid.get_face_detected()
                     if is_true:
                         if faces:
-                            for face in faces:
-                                resize_face = cv2.resize(face, (224,224))
-                                user_name = self.get_face_info(resize_face)
-                                if user_name:
-                                    frame = cv2_img_add_text(frame,user_name,(0,5),(0,0,255))
+                            # for face in faces:
+                            #     resize_face = cv2.resize(face, (224,224))
+                            #     user_name = self.get_face_info(resize_face)
+                            #     if user_name:
+                            #         frame = cv2_img_add_text(frame,user_name,(0,5),(0,0,255))
+                            resize_face = cv2.resize(faces[0], (224,224))
+                            user_name = self.get_face_info(resize_face)
+                            if user_name:
+                                frame = cv2_img_add_text(frame,user_name,(0,5),(0,0,255))
                         self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
                         self.photo_gray = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)))
                         self.canvas.create_image(0,0,image=self.photo,anchor='nw')
