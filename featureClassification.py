@@ -6,11 +6,13 @@
 import numpy as np
 from featureExtraction import feature_extraction_vgg_face
 import os
+import time
 
 feature_ds_path = r'storage\model\feature_ds\feature_ds.npz'
 
 
 def euclidean_dist_classify(face_pixels):
+    t1_start = time.process_time()
     if os.path.exists(feature_ds_path):
         feature_ds = np.load(feature_ds_path)
     euclid_dist_list = []
@@ -22,10 +24,36 @@ def euclidean_dist_classify(face_pixels):
     min_index = euclid_dist_list.index(min_distance)
     label = feature_ds['label'][min_index]
     print('Label: %s, distance: %.3f' % (label, min_distance))
+    t1_stop = time.process_time()
+    print("Recognize face time: " + str(t1_stop-t1_start))
     return label, min_distance
 
 
+# def softmax(x):
+#     """Compute softmax values for each sets of scores in x."""
+#     e_x = np.exp(x - np.max(x, axis = 0, keepdims = True))
+#     return e_x / e_x.sum(axis=0)
+
+
+# def euclidean_dist_classify(face_pixels):
+#     if os.path.exists(feature_ds_path):
+#         feature_ds = np.load(feature_ds_path)
+#     euclid_dist_list = []
+#     audit_feature = feature_extraction_vgg_face(face_pixels)
+#     for feature in feature_ds['feature']:
+#         euclidean_dist = np.linalg.norm(audit_feature - feature)
+#         euclid_dist_list.append(euclidean_dist)
+#     probability_list = softmax(euclid_dist_list)
+#     print(np.max(probability_list))
+#     min_distance = np.min(euclid_dist_list)
+#     min_index = euclid_dist_list.index(min_distance)
+#     label = feature_ds['label'][min_index]
+#     print('Label: %s (%.3f), distance: %.3f' % (label, probability_list[min_index],min_distance))
+#     return label, probability_list[min_index]
+
+
 def cosine_similarity_classify(face_pixels):
+    t1_start = time.process_time()
     if os.path.exists(feature_ds_path):
         feature_ds = np.load(feature_ds_path)
     probability_list = []
@@ -37,6 +65,8 @@ def cosine_similarity_classify(face_pixels):
     max_index = probability_list.index(max_prob)
     label = feature_ds['label'][max_index]
     print('Label: %s (%.3f)' % (label, max_prob))
+    t1_stop = time.process_time()
+    print("Recognize face time: " + str(t1_stop-t1_start))
     return label, max_prob
 
 
@@ -70,6 +100,7 @@ def train_svm_classification_model():
 
 
 def svm_classify(face_pixels):
+    t1_start = time.process_time()
     audit_feature = feature_extraction_vgg_face(face_pixels)
     save_path = r'storage\model\feature_classify\svm_classification_model.sav'
     svm_classify_model = pickle.load(open(save_path, 'rb'))
@@ -82,6 +113,8 @@ def svm_classify(face_pixels):
     labels.classes_ = np.load(r'storage\model\feature_classify\svm_classes.npy')
     predict_names = labels.inverse_transform(yhat_class)
     print('Predicted: %s (%.3f)' % (predict_names[0], class_probability))
+    t1_stop = time.process_time()
+    print("Recognize face time: " + str(t1_stop-t1_start))
     return predict_names[0], class_probability
 
 
@@ -111,6 +144,7 @@ def train_knn_classification_model():
 
 
 def knn_classify(face_pixels):
+    t1_start = time.process_time()
     audit_feature = feature_extraction_vgg_face(face_pixels)
     save_path = r'storage\model\feature_classify\knn_classification_model.sav'
     svm_classify_model = pickle.load(open(save_path, 'rb'))
@@ -121,5 +155,7 @@ def knn_classify(face_pixels):
     labels.classes_ = np.load(r'storage\model\feature_classify\knn_classes.npy')
     predict_names = labels.inverse_transform(yhat_class)
     print('Predicted: %s' % (predict_names[0]))
+    t1_stop = time.process_time()
+    print("Recognize face time: " + str(t1_stop-t1_start))
     return predict_names[0]
 

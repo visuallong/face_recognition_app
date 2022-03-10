@@ -16,12 +16,17 @@ def img_normalize(face_pixels):
     mean = face_pixels.mean()
     std  = face_pixels.std()
     face_pixels = (face_pixels - mean)/std
-    samples = np.expand_dims(face_pixels,axis=0)
-    return samples
+    return face_pixels
+
+# def img_normalize(face_pixels):
+#     face_pixels = face_pixels.astype('float32')
+#     face_pixels = face_pixels / 255.
+#     return face_pixels
 
 # type(face_pixels) = np.array
 def feature_extraction(model, face_pixels):
-    samples = img_normalize(face_pixels)
+    face_pixels = img_normalize(face_pixels)
+    samples = np.expand_dims(face_pixels,axis=0)
     yhat = model.predict(samples)
     return yhat[0]
 

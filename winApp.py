@@ -16,11 +16,12 @@ from featureClassification import euclidean_dist_classify, cosine_similarity_cla
 from typing import Tuple
 import numpy as np
 import imutils
+from preTrain import train_triplet_loss
 
 
 names = []
 fld_list = []
-batch_size_chooser = [16, 32, 64, 128, 256, 512]
+batch_size_chooser = [24, 48, 96, 288, 576]
 input_chosser = ['Webcam', 'File']
 classify_methods_chooser = ['Euclidean Distance', 'Cosine Similarity', 'SVM', 'KNN']
 face_detect_methods_chooser = ['Dlib-HOG', 'Dlib-CNN', 'MTCNN', 'HaarCascades']
@@ -194,13 +195,13 @@ class PageThree(tk.Frame):
         self.epochs_input = tk.Entry(self.adv_frame, textvariable = self.epochs_var)
         self.epochs_input.grid(row=0, column=1)
         tk.Label(self.adv_frame, text="Batch Size:").grid(row=1, column=0)
-        self.batch_size_var = tk.IntVar(value=16)
+        self.batch_size_var = tk.DoubleVar(value=24)
         self.dropdown = tk.OptionMenu(self.adv_frame, self.batch_size_var, *batch_size_chooser)
         self.dropdown.config(bg="lightgrey")
         self.dropdown["menu"].config(bg="lightgrey")
         self.dropdown.grid(row=1, column=1)
         tk.Label(self.adv_frame, text="Learning Rate:").grid(row=2, column=0)
-        self.lr_var = tk.IntVar(value=0.001)
+        self.lr_var = tk.DoubleVar(value=0.001)
         self.lr_input = tk.Entry(self.adv_frame, textvariable = self.lr_var)
         self.lr_input.grid(row=2, column=1)
         self.defaults_label = tk.Label(self.adv_frame, text="Reset defaults")
@@ -233,7 +234,10 @@ class PageThree(tk.Frame):
             train_knn_classification_model()
 
     def train_model(self):
-        None
+        batch_size = self.batch_size_var.get()
+        lr = self.lr_var.get()
+        epochs = self.epochs_var.get()
+        train_triplet_loss(batch_size_=batch_size,lr=lr,epochs=epochs)
     
     def hide_show_opt(self):
         if self.show_opt:
@@ -245,7 +249,7 @@ class PageThree(tk.Frame):
 
     def reset_defaults(self):
         self.epochs_var.set(50)
-        self.batch_size_var.set(16)
+        self.batch_size_var.set(24)
         self.lr_var.set(0.001)
 
     def under_the_hood(self):
@@ -253,6 +257,7 @@ class PageThree(tk.Frame):
 
     def create_f_ds(self):
         create_feature_ds()
+        messagebox.showinfo("Success","Feature dataset created successfull")
 
     def cancel(self):
         self.controller.show_frame("StartPage")  
@@ -372,7 +377,7 @@ class PageFour(tk.Frame):
                 if messagebox.showinfo("Success", "Image remove successfull"):
                     self.view()
             else:
-                messagebox.showinfo("Warning", "Image does not exits")
+                messagebox.showwarning("Warning", "Image does not exits")
 
     def add_a_image(self):
         self.webcam_ = webcam(self, controller=self.controller)
@@ -625,7 +630,7 @@ class PageSix(tk.Frame):
                 if messagebox.showinfo("Success", "Image remove successfull"):
                     self.view()
             else:
-                messagebox.showinfo("Warning", "Image does not exits")
+                messagebox.showwarning("Warning", "Image does not exits")
 
     def defaults(self):
         for widget in self.frame.winfo_children():
@@ -649,7 +654,7 @@ class PageSix(tk.Frame):
                 if faces_img:
                     for face_img in faces_img:
                         if len(os.listdir(fld_path)) >= 8:
-                            if messagebox.showinfo("Warning", "Database for this user enough 8 images.\nPlease delete before add more image?"):
+                            if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image?"):
                                 if messagebox.showinfo("Complete", "Add {} user face image(s)".format(count)):
                                     self.controller.frames["PageSix"].view()
                                     return
@@ -799,11 +804,11 @@ class webcam(tk.Toplevel):
                             self.label.bind("<Button-1>", lambda e:self.upload_file())
                             self.destroy()
                     else:
-                        if messagebox.showinfo("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
+                        if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
                             self.label.bind("<Button-1>", lambda e:self.upload_file())
                             self.destroy()
                 else:
-                    if messagebox.showinfo("Error", "No face detected"):
+                    if messagebox.showerror("Error", "No face detected"):
                         self.label.bind("<Button-1>", lambda e:self.upload_file())
 
     def get_face_detected(self,img):
@@ -838,11 +843,11 @@ class webcam(tk.Toplevel):
                         if messagebox.showinfo("Success", "Save image successfull"):
                             self.controller.frames["PageSix"].view()
                     else:
-                        if messagebox.showinfo("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
+                        if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
                             self.btn_snapshot.configure(command=self.snapshot)
                             self.destroy()
                 else:
-                    if messagebox.showinfo("Error", "No face detected"):
+                    if messagebox.showerror("Error", "No face detected"):
                         self.btn_snapshot.configure(command=self.snapshot)
         elif self.mode == "PageFour":
             is_true, frame, faces_image = self.vid.get_face_detected()
@@ -858,7 +863,7 @@ class webcam(tk.Toplevel):
                     self.destroy()
                 else:
                     self.btn_snapshot.configure(command=self.snapshot)
-                    if messagebox.showinfo("Warning", "No face detected"):
+                    if messagebox.showwarning("Warning", "No face detected"):
                         self.btn_snapshot.configure(command=self.snapshot)
 
     def update(self):
@@ -926,16 +931,19 @@ class webcam(tk.Toplevel):
                 user_name = self.get_face_info(resize_face)
                 if user_name:
                     show = cv2_img_add_text(resize_img,user_name,(0,5),(0,0,255))
-            self.loaded_photo = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(show, cv2.COLOR_BGR2RGB)))
-            self.loaded_photo_gray = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(show, cv2.COLOR_BGR2GRAY)))
+                    self.loaded_photo = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(show, cv2.COLOR_BGR2RGB)))
+                    self.loaded_photo_gray = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(show, cv2.COLOR_BGR2GRAY)))
+            else:
+                self.loaded_photo = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(resize_img, cv2.COLOR_BGR2RGB)))
+                messagebox.showerror("Error","No face detected")
 
     def get_face_info(self, face_pixels):
         label = None
         show = None
         # print(self.controller.activate_classify_method)
         if self.controller.activate_classify_method == "Euclidean Distance":
-            label, min_dist = euclidean_dist_classify(face_pixels)
-            show = 'User : %s \n Distance: %.3f' % (label, min_dist)
+            label, prob = euclidean_dist_classify(face_pixels)
+            show = 'User : %s \n Dist: %.3f' % (label, prob)
             # if min_dist > 0.45:
             #     label = 'Unknown'
         elif self.controller.activate_classify_method == "Cosine Similarity":
@@ -963,17 +971,17 @@ def cv2_img_add_text(img, text, left_corner: Tuple[int, int], text_rgb_color=(25
     return cv2_img
 
 
+from PIL import ImageGrab
+
+
 class video_capture:
     def __init__(self, video_source = 0):
-        self.vid = cv2.VideoCapture(video_source)
-        if not self.vid.isOpened():
-            raise ValueError("Unable to open this camera \n Select another video source", video_source)
-        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.width = 640
+        self.height = 360
     
     def get_frame(self):
-        if self.vid.isOpened():
-            is_true, frame = self.vid.read()
+        if True:
+            is_true, frame = True, cv2.cvtColor(np.asarray(ImageGrab.grab().resize((640,360))), cv2.COLOR_BGR2RGB)
             if is_true:
                 return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             else:
@@ -982,8 +990,8 @@ class video_capture:
             return (is_true, None)
 
     def get_face_detected(self):
-        if self.vid.isOpened():
-            is_true, frame = self.vid.read()
+        if True:
+            is_true, frame = True, cv2.cvtColor(np.asarray(ImageGrab.grab()), cv2.COLOR_BGR2RGB)
             if is_true:
                 faces_img = []
                 faces_location = []
@@ -1000,7 +1008,7 @@ class video_capture:
                     for face_location in faces_location:
                         (x, y, w, h) = face_location
                         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-                return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), faces_img)
+                return (is_true, cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),(640,360)), faces_img)
             else:
                 return (is_true, None, None)
         else:
@@ -1009,6 +1017,54 @@ class video_capture:
     def __del__(self):
         if self.vid.isOpened():
             self.vid.release()
+
+
+# class video_capture:
+#     def __init__(self, video_source = 0):
+#         self.vid = cv2.VideoCapture(video_source)
+#         if not self.vid.isOpened():
+#             raise ValueError("Unable to open this camera \n Select another video source", video_source)
+#         self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+#         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    
+#     def get_frame(self):
+#         if self.vid.isOpened():
+#             is_true, frame = self.vid.read()
+#             if is_true:
+#                 return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+#             else:
+#                 return (is_true, None)
+#         else:
+#             return (is_true, None)
+
+#     def get_face_detected(self):
+#         if self.vid.isOpened():
+#             is_true, frame = self.vid.read()
+#             if is_true:
+#                 faces_img = []
+#                 faces_location = []
+#                 global activate_face_detect_method
+#                 if activate_face_detect_method == "Dlib-HOG":
+#                     faces_img, faces_location = face_detector_hog(frame)
+#                 elif activate_face_detect_method == "Dlib-CNN":
+#                     faces_img, faces_location = face_detector_cnn(frame)
+#                 elif activate_face_detect_method == "MTCNN":
+#                     faces_img, faces_location = face_detector_mtcnn(frame)
+#                 elif activate_face_detect_method == "HaarCascades":
+#                     faces_img, faces_location = face_detector_haarcascades(frame)
+#                 if faces_img:
+#                     for face_location in faces_location:
+#                         (x, y, w, h) = face_location
+#                         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+#                 return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), faces_img)
+#             else:
+#                 return (is_true, None, None)
+#         else:
+#             return (is_true, None, None)
+    
+#     def __del__(self):
+#         if self.vid.isOpened():
+#             self.vid.release()
 
 
 app = MainUI()

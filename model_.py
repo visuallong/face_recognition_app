@@ -56,6 +56,8 @@ def deep_rank_model():
     vgg_face_model_ = vgg_face_model()
     vgg_face_weights_path = r'storage\model\vgg_face_weights.h5'
     vgg_face_model_.load_weights(vgg_face_weights_path)
+    vgg_face_model_.trainable = False
+    # vgg_face_model_.summary()
     x = vgg_face_model_.layers[-3].output
     x = GlobalAveragePooling2D()(x)
     x = Dense(2622, activation='relu')(x)
@@ -83,7 +85,7 @@ def deep_rank_model():
 
     merge_one = concatenate([first_max, second_max])
     merge_two = concatenate([merge_one, vgg_face_model_.output])
-    emb = Dense(4096)(merge_two)
+    emb = Dense(2622)(merge_two)
     emb = Dense(128)(emb)
     l2_norm_final = Lambda(lambda x: K.l2_normalize(x, axis=1))(emb)
     # l2_norm_final = Lambda(K.l2_normalize)(emb)
