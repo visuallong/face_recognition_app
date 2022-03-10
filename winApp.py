@@ -971,65 +971,17 @@ def cv2_img_add_text(img, text, left_corner: Tuple[int, int], text_rgb_color=(25
     return cv2_img
 
 
-from PIL import ImageGrab
-
-
-class video_capture:
-    def __init__(self, video_source = 0):
-        self.width = 640
-        self.height = 360
-    
-    def get_frame(self):
-        if True:
-            is_true, frame = True, cv2.cvtColor(np.asarray(ImageGrab.grab().resize((640,360))), cv2.COLOR_BGR2RGB)
-            if is_true:
-                return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            else:
-                return (is_true, None)
-        else:
-            return (is_true, None)
-
-    def get_face_detected(self):
-        if True:
-            is_true, frame = True, cv2.cvtColor(np.asarray(ImageGrab.grab()), cv2.COLOR_BGR2RGB)
-            if is_true:
-                faces_img = []
-                faces_location = []
-                global activate_face_detect_method
-                if activate_face_detect_method == "Dlib-HOG":
-                    faces_img, faces_location = face_detector_hog(frame)
-                elif activate_face_detect_method == "Dlib-CNN":
-                    faces_img, faces_location = face_detector_cnn(frame)
-                elif activate_face_detect_method == "MTCNN":
-                    faces_img, faces_location = face_detector_mtcnn(frame)
-                elif activate_face_detect_method == "HaarCascades":
-                    faces_img, faces_location = face_detector_haarcascades(frame)
-                if faces_img:
-                    for face_location in faces_location:
-                        (x, y, w, h) = face_location
-                        cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-                return (is_true, cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),(640,360)), faces_img)
-            else:
-                return (is_true, None, None)
-        else:
-            return (is_true, None, None)
-    
-    def __del__(self):
-        if self.vid.isOpened():
-            self.vid.release()
+# from PIL import ImageGrab
 
 
 # class video_capture:
 #     def __init__(self, video_source = 0):
-#         self.vid = cv2.VideoCapture(video_source)
-#         if not self.vid.isOpened():
-#             raise ValueError("Unable to open this camera \n Select another video source", video_source)
-#         self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-#         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+#         self.width = 640
+#         self.height = 360
     
 #     def get_frame(self):
-#         if self.vid.isOpened():
-#             is_true, frame = self.vid.read()
+#         if True:
+#             is_true, frame = True, cv2.cvtColor(np.asarray(ImageGrab.grab().resize((640,360))), cv2.COLOR_BGR2RGB)
 #             if is_true:
 #                 return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 #             else:
@@ -1038,8 +990,8 @@ class video_capture:
 #             return (is_true, None)
 
 #     def get_face_detected(self):
-#         if self.vid.isOpened():
-#             is_true, frame = self.vid.read()
+#         if True:
+#             is_true, frame = True, cv2.cvtColor(np.asarray(ImageGrab.grab()), cv2.COLOR_BGR2RGB)
 #             if is_true:
 #                 faces_img = []
 #                 faces_location = []
@@ -1056,7 +1008,7 @@ class video_capture:
 #                     for face_location in faces_location:
 #                         (x, y, w, h) = face_location
 #                         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-#                 return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), faces_img)
+#                 return (is_true, cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),(640,360)), faces_img)
 #             else:
 #                 return (is_true, None, None)
 #         else:
@@ -1065,6 +1017,54 @@ class video_capture:
 #     def __del__(self):
 #         if self.vid.isOpened():
 #             self.vid.release()
+
+
+class video_capture:
+    def __init__(self, video_source = 0):
+        self.vid = cv2.VideoCapture(video_source)
+        if not self.vid.isOpened():
+            raise ValueError("Unable to open this camera \n Select another video source", video_source)
+        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    
+    def get_frame(self):
+        if self.vid.isOpened():
+            is_true, frame = self.vid.read()
+            if is_true:
+                return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            else:
+                return (is_true, None)
+        else:
+            return (is_true, None)
+
+    def get_face_detected(self):
+        if self.vid.isOpened():
+            is_true, frame = self.vid.read()
+            if is_true:
+                faces_img = []
+                faces_location = []
+                global activate_face_detect_method
+                if activate_face_detect_method == "Dlib-HOG":
+                    faces_img, faces_location = face_detector_hog(frame)
+                elif activate_face_detect_method == "Dlib-CNN":
+                    faces_img, faces_location = face_detector_cnn(frame)
+                elif activate_face_detect_method == "MTCNN":
+                    faces_img, faces_location = face_detector_mtcnn(frame)
+                elif activate_face_detect_method == "HaarCascades":
+                    faces_img, faces_location = face_detector_haarcascades(frame)
+                if faces_img:
+                    for face_location in faces_location:
+                        (x, y, w, h) = face_location
+                        cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+                return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), faces_img)
+            else:
+                return (is_true, None, None)
+        else:
+            return (is_true, None, None)
+    
+    def __del__(self):
+        if self.vid.isOpened():
+            self.vid.release()
 
 
 app = MainUI()
