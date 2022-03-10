@@ -12,12 +12,15 @@ def face_detector_hog(image):
     faces_location_ = hog_face_detector(image, 0)
     faces_img = []
     faces_location = []
-    for face_location_ in faces_location_:
-        (x, y, w, h) = rect_to_bb(face_location_)
-        face = image[y:y + h, x:x + w]
-        face = cv2.resize(face, (224, 224), interpolation = cv2.INTER_AREA)
-        faces_img.append(face)
-        faces_location.append((x, y, w, h))
+    if faces_location_:
+        for face_location_ in faces_location_:
+            (x, y, w, h) = rect_to_bb(face_location_)
+            face = image[y:y + h, x:x + w]
+            face = cv2.resize(face, (224, 224), interpolation = cv2.INTER_AREA)
+            faces_img.append(face)
+            faces_location.append((x, y, w, h))
+    else:
+        print("No face detected")
     t1_stop = time.process_time()
     print("Detect face(s) time: " + str(t1_stop-t1_start))
     return faces_img, faces_location
@@ -37,7 +40,9 @@ def face_detector_cnn(image):
             face = cv2.resize(face, (224, 224), interpolation = cv2.INTER_AREA)
             faces_img.append(face)
             faces_location.append((x, y, w, h))
-            t1_stop = time.process_time()
+    else:
+        print("No face detected")
+    t1_stop = time.process_time()
     print("Detect face(s) time: " + str(t1_stop-t1_start))
     return faces_img, faces_location
 
@@ -68,6 +73,8 @@ def face_detector_mtcnn(image):
             face_img = image[y+2:y+h-2, a+2:b-2]
             faces_img.append(face_img)
             faces_location.append((a,y,h,h))
+    if faces_location is None:
+        print("No face detected")
     t1_stop = time.process_time()
     print("Detect face(s) time: " + str(t1_stop-t1_start))
     return faces_img, faces_location
@@ -80,9 +87,12 @@ def face_detector_haarcascades(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces_location = face_cascade.detectMultiScale(gray, 1.3, 5)
     faces_img = []
-    for (x,y,w,h) in faces_location:
-        face_image = image[y:y+h, x:x+w]
-        faces_img.append(face_image)
+    if faces_location:
+        for (x,y,w,h) in faces_location:
+            face_image = image[y:y+h, x:x+w]
+            faces_img.append(face_image)
+    else:
+        print("No face detected")
     t1_stop = time.process_time()
     print("Detect face(s) time: " + str(t1_stop-t1_start))
     return faces_img, faces_location
