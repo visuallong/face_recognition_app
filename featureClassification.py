@@ -67,7 +67,7 @@ def cosine_similarity_classify(face_pixels):
     print('Label: %s (%.3f)' % (label, max_prob))
     t1_stop = time.process_time()
     print("Recognize face time: " + str(t1_stop-t1_start))
-    return label, max_prob
+    return label, max_prob*100
 
 
 from sklearn.preprocessing import LabelEncoder

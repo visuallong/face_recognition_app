@@ -71,6 +71,7 @@ def face_detector_mtcnn(image):
             a = round(x-i)
             b = a+h
             face_img = image[y+2:y+h-2, a+2:b-2]
+            face_img = cv2.resize(face_img, (224, 224), interpolation = cv2.INTER_AREA)
             faces_img.append(face_img)
             faces_location.append((a,y,h,h))
     if faces_location is None:
@@ -90,6 +91,7 @@ def face_detector_haarcascades(image):
     if faces_location:
         for (x,y,w,h) in faces_location:
             face_image = image[y:y+h, x:x+w]
+            face_img = cv2.resize(face_img, (224, 224), interpolation = cv2.INTER_AREA)
             faces_img.append(face_image)
     else:
         print("No face detected")

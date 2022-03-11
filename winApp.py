@@ -17,7 +17,7 @@ from typing import Tuple
 import numpy as np
 import imutils
 from preTrain import train_triplet_loss
-
+import  time
 
 names = []
 fld_list = []
@@ -650,8 +650,9 @@ class PageSix(tk.Frame):
             count = 0
             for file_path in file_path_list:
                 loaded_image = cv2.imread(file_path)
-                frame, faces_img = self.get_face_detected(loaded_image)
+                frame, faces_img, faces_location = self.get_face_detected(loaded_image)
                 if faces_img:
+                    i = 0
                     for face_img in faces_img:
                         if len(os.listdir(fld_path)) >= 8:
                             if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image?"):
@@ -659,7 +660,11 @@ class PageSix(tk.Frame):
                                     self.controller.frames["PageSix"].view()
                                     return
                         else:
-                            path = os.path.join(fld_path, "img" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
+                            path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
+                            if os.path.exists(path):
+                                f_name, f_ext = os.path.splitext(path)
+                                path = f_name + i + f_ext
+                                i += 1
                             cv2.imwrite(path, face_img)
                             count += 1
             if messagebox.showinfo("Complete", "Add {} user face image(s)".format(count)):
@@ -681,7 +686,7 @@ class PageSix(tk.Frame):
             for face_location in faces_location:
                 (x, y, w, h) = face_location
                 cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
-        return (cv2.cvtColor(img, cv2.COLOR_BGR2RGB), faces_img)
+        return (cv2.cvtColor(img, cv2.COLOR_BGR2RGB), faces_img, faces_location)
 
     def cancel(self):
         fld_name = fld_list[names.index(self.controller.activate_name)]
@@ -793,20 +798,25 @@ class webcam(tk.Toplevel):
                 fld_name = fld_list[names.index(self.controller.activate_name)]
                 fld_path = os.path.join(r'storage\imageBase', fld_name)
                 loaded_image = cv2.imread(file_path)
-                frame, faces_img = self.get_face_detected(loaded_image)
+                frame, faces_img, faces_location = self.get_face_detected(loaded_image)
                 if faces_img:
-                    if len(os.listdir(fld_path)) < 8:
-                        for face_img in faces_img:
-                            path = os.path.join(fld_path, "img" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
+                    i = 0
+                    for face_img in faces_img:
+                        if len(os.listdir(fld_path)) < 8: 
+                            path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
+                            if os.path.exists(path):
+                                f_name, f_ext = os.path.splitext(path)
+                                path = f_name + i + f_ext
+                                i += 1
                             cv2.imwrite(path, face_img)
                             self.controller.frames["PageFour"].view()
-                        if messagebox.showinfo("Success", "Save image successfull"):
-                            self.label.bind("<Button-1>", lambda e:self.upload_file())
-                            self.destroy()
-                    else:
-                        if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
-                            self.label.bind("<Button-1>", lambda e:self.upload_file())
-                            self.destroy()
+                            if messagebox.showinfo("Success", "Save image successfull"):
+                                self.label.bind("<Button-1>", lambda e:self.upload_file())
+                                self.destroy()
+                        else:
+                            if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
+                                self.label.bind("<Button-1>", lambda e:self.upload_file())
+                                self.destroy()
                 else:
                     if messagebox.showerror("Error", "No face detected"):
                         self.label.bind("<Button-1>", lambda e:self.upload_file())
@@ -827,40 +837,57 @@ class webcam(tk.Toplevel):
             for face_location in faces_location:
                 (x, y, w, h) = face_location
                 cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
-        return (cv2.cvtColor(img, cv2.COLOR_BGR2RGB), faces_img)
+        return (cv2.cvtColor(img, cv2.COLOR_BGR2RGB), faces_img, faces_location)
 
     def snapshot(self):
         self.btn_snapshot.configure(command=self.disable)
         if self.mode == "PageSix":
-            is_true, frame, faces_image = self.vid.get_face_detected()
+            is_true, frame, faces_image, faces_location = self.vid.get_face_detected()
             if is_true:
                 fld_name = fld_list[names.index(self.controller.activate_name)]
                 fld_path = os.path.join(r'storage\imageBase', fld_name)
                 if faces_image:
-                    if len(os.listdir(fld_path)) < 8:
-                        path = os.path.join(fld_path, "img" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
-                        cv2.imwrite(path, faces_image[0])
-                        if messagebox.showinfo("Success", "Save image successfull"):
-                            self.controller.frames["PageSix"].view()
-                    else:
-                        if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
-                            self.btn_snapshot.configure(command=self.snapshot)
-                            self.destroy()
+                    i = 0
+                    for face_image in faces_image:
+                        if len(os.listdir(fld_path)) < 8:
+                            path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
+                            if os.path.exists(path):
+                                f_name, f_ext = os.path.splitext(path)
+                                path = f_name + i + f_ext
+                                i += 1
+                            cv2.imwrite(path, face_image)
+                            if messagebox.showinfo("Success", "Save image successfull"):
+                                self.controller.frames["PageSix"].view()
+                        else:
+                            if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
+                                self.btn_snapshot.configure(command=self.snapshot)
+                                self.destroy()
                 else:
                     if messagebox.showerror("Error", "No face detected"):
                         self.btn_snapshot.configure(command=self.snapshot)
         elif self.mode == "PageFour":
-            is_true, frame, faces_image = self.vid.get_face_detected()
+            is_true, frame, faces_image, faces_location = self.vid.get_face_detected()
             if is_true:
                 fld_name = fld_list[names.index(self.controller.activate_name)]
                 fld_path = os.path.join(r'storage\imageBase', fld_name)
                 if faces_image:
-                    path = os.path.join(fld_path, "img" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
-                    cv2.imwrite(path, faces_image[0])
-                    # messagebox.showinfo("Success", "Save image successfull")
-                    self.controller.frames["PageFour"].view()
-                    self.btn_snapshot.configure(command=self.snapshot)
-                    self.destroy()
+                    for face_image in faces_image:
+                        if len(os.listdir(fld_path)) < 8: 
+                            path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
+                            if os.path.exists(path):
+                                f_name, f_ext = os.path.splitext(path)
+                                path = f_name + i + f_ext
+                                i += 1
+                            cv2.imwrite(path, face_image)
+                            if messagebox.showinfo("Success", "Save image successfull"):
+                                self.controller.frames["PageFour"].view()
+                                self.btn_snapshot.configure(command=self.snapshot)
+                                self.destroy()
+                        else:
+                            if messagebox.showwarning("Warning", "Database for this user enough 8 images.\nPlease delete before add more image"):
+                                self.controller.frames["PageFour"].view()
+                                self.btn_snapshot.configure(command=self.snapshot)
+                                self.destroy()
                 else:
                     self.btn_snapshot.configure(command=self.snapshot)
                     if messagebox.showwarning("Warning", "No face detected"):
@@ -870,18 +897,17 @@ class webcam(tk.Toplevel):
         if self.mode == "PageTwo":
             if self.is_on:
                 if self.menuvar.get() == "Webcam":
-                    is_true, frame, faces = self.vid.get_face_detected()
+                    is_true, frame, faces, faces_location = self.vid.get_face_detected()
                     if is_true:
                         if faces:
-                            # for face in faces:
-                            #     resize_face = cv2.resize(face, (224,224))
-                            #     user_name = self.get_face_info(resize_face)
-                            #     if user_name:
-                            #         frame = cv2_img_add_text(frame,user_name,(0,5),(0,0,255))
-                            resize_face = cv2.resize(faces[0], (224,224))
-                            user_name = self.get_face_info(resize_face)
-                            if user_name:
-                                frame = cv2_img_add_text(frame,user_name,(0,5),(0,0,255))
+                            for i, face in enumerate(faces):
+                                # resize_face = cv2.resize(face, (224,224))
+                                user_info = self.get_face_info(face)
+                                (x, y, w, h) = faces_location[i]
+                                if user_info:
+                                    frame = cv2_img_add_text(frame,user_info,(x,y),(0,0,255))
+                            t = time.strftime("%d-%m-%y-%H-%M-%S")
+                            frame = cv2_img_add_text(frame,t,(0,frame.shape[0]-20),(0,0,255))
                         self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
                         self.photo_gray = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)))
                         self.canvas.create_image(0,0,image=self.photo,anchor='nw')
@@ -929,16 +955,20 @@ class webcam(tk.Toplevel):
                 resize_img = imutils.resize(img, width=640)
             else:
                 resize_img = img
-            frame, faces = self.get_face_detected(img)
+            frame, faces, faces_location = self.get_face_detected(resize_img)
             if faces:
-                resize_face = cv2.resize(faces[0], (224,224))
-                user_name = self.get_face_info(resize_face)
-                if user_name:
-                    show = cv2_img_add_text(resize_img,user_name,(0,5),(0,0,255))
-                    self.loaded_photo = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(show, cv2.COLOR_BGR2RGB)))
-                    self.loaded_photo_gray = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(show, cv2.COLOR_BGR2GRAY)))
+                for i, face in enumerate(faces):
+                    user_info = self.get_face_info(face)
+                    (x, y, w, h) = faces_location[i]
+                    if user_info:
+                        frame = cv2_img_add_text(frame,user_info,(x,y),(0,0,255))
+                t = time.strftime("%d-%m-%y-%H-%M-%S")
+                frame = cv2_img_add_text(frame,t,(0,frame.shape[0]-20),(0,0,255))
+                self.loaded_photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.loaded_photo_gray = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)))
             else:
-                self.loaded_photo = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(resize_img, cv2.COLOR_BGR2RGB)))
+                self.loaded_photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
+                self.loaded_photo_gray = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)))
                 messagebox.showerror("Error","No face detected")
 
     def get_face_info(self, face_pixels):
@@ -946,16 +976,16 @@ class webcam(tk.Toplevel):
         show = None
         # print(self.controller.activate_classify_method)
         if self.controller.activate_classify_method == "Euclidean Distance":
-            label, prob = euclidean_dist_classify(face_pixels)
-            show = 'User : %s \n Dist: %.3f' % (label, prob)
+            label, dist = euclidean_dist_classify(face_pixels)
             # if min_dist > 0.45:
             #     label = 'Unknown'
+            show = 'User : %s \n Dist: %.3f' % (label, dist)
         elif self.controller.activate_classify_method == "Cosine Similarity":
             label, prob = cosine_similarity_classify(face_pixels)
-            show = 'User : %s \n Prob: %.3f' % (label, prob)
+            show = 'User : %s \n Prob: %.1f' % (label, prob) + '%'
         elif self.controller.activate_classify_method == "SVM":
             label, prob = svm_classify(face_pixels)
-            show = 'User : %s \n Prob: %.3f' % (label, prob)
+            show = 'User : %s \n Prob: %.1f' % (label, prob) + '%'
         elif self.controller.activate_classify_method == "KNN":
             label = knn_classify(face_pixels)
             show = 'User : %s' % (label)
@@ -1012,11 +1042,11 @@ def cv2_img_add_text(img, text, left_corner: Tuple[int, int], text_rgb_color=(25
 #                     for face_location in faces_location:
 #                         (x, y, w, h) = face_location
 #                         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-#                 return (is_true, cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),(640,360)), faces_img)
+#                 return (is_true, cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),(640,360)), faces_img, faces_location)
 #             else:
-#                 return (is_true, None, None)
+#                 return (is_true, None, None, None)
 #         else:
-#             return (is_true, None, None)
+#             return (is_true, None, None, None)
     
 #     def __del__(self):
 #         if self.vid.isOpened():
@@ -1060,11 +1090,11 @@ class video_capture:
                     for face_location in faces_location:
                         (x, y, w, h) = face_location
                         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-                return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), faces_img)
+                return (is_true, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), faces_img, faces_location)
             else:
-                return (is_true, None, None)
+                return (is_true, None, None, None)
         else:
-            return (is_true, None, None)
+            return (is_true, None, None, None)
     
     def __del__(self):
         if self.vid.isOpened():
