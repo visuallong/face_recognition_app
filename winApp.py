@@ -663,7 +663,7 @@ class PageSix(tk.Frame):
                             path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
                             if os.path.exists(path):
                                 f_name, f_ext = os.path.splitext(path)
-                                path = f_name + i + f_ext
+                                path = f_name + '_' + i + f_ext
                                 i += 1
                             cv2.imwrite(path, face_img)
                             count += 1
@@ -806,7 +806,7 @@ class webcam(tk.Toplevel):
                             path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
                             if os.path.exists(path):
                                 f_name, f_ext = os.path.splitext(path)
-                                path = f_name + i + f_ext
+                                path = f_name + '_' + i + f_ext
                                 i += 1
                             cv2.imwrite(path, face_img)
                             self.controller.frames["PageFour"].view()
@@ -853,7 +853,7 @@ class webcam(tk.Toplevel):
                             path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
                             if os.path.exists(path):
                                 f_name, f_ext = os.path.splitext(path)
-                                path = f_name + i + f_ext
+                                path = f_name + '_' + i + f_ext
                                 i += 1
                             cv2.imwrite(path, face_image)
                             if messagebox.showinfo("Success", "Save image successfull"):
@@ -876,7 +876,7 @@ class webcam(tk.Toplevel):
                             path = os.path.join(fld_path, "img-" + time.strftime("%d-%m-%y-%H-%M-%S") + ".jpg")
                             if os.path.exists(path):
                                 f_name, f_ext = os.path.splitext(path)
-                                path = f_name + i + f_ext
+                                path = f_name + '_' + i + f_ext
                                 i += 1
                             cv2.imwrite(path, face_image)
                             if messagebox.showinfo("Success", "Save image successfull"):
