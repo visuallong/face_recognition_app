@@ -121,20 +121,31 @@ class StartPage(tk.Frame):
 class PageOne(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
         self.controller = controller
         label = tk.Label(self, text="Database", font=self.controller.title_font,fg="#263942", anchor="center")
-        label.grid(column=0,row=0)
+        label.grid(row=0, column=0)
         button1 = tk.Button(self, text="  View Database ", fg="#ffffff", bg="#263942",command=lambda:self.controller.show_frame("PageFour"))
         button2 = tk.Button(self, text="Create new User", fg="#ffffff", bg="#263942",command=lambda:self.controller.show_frame("PageFive"))
         button3 = tk.Button(self, text="Back", bg="#ffffff", fg="#263942",command=lambda:self.controller.show_frame("StartPage"))
-        button1.grid(row=1, ipady=3, ipadx=1)
-        button2.grid(row=2, ipady=3, ipadx=1)
-        button3.grid(row=4, ipady=3, ipadx=31)
+        button1.grid(row=1, column=0, ipady=3, ipadx=1)
+        button2.grid(row=2, column=0, ipady=3, ipadx=1)
+        button3.grid(row=3, column=0, ipady=3, ipadx=31)
 
 
 class PageTwo(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
         self.controller = controller
         self.webcam_ = None
         label = tk.Label(self, text="Face Recognitize", font=self.controller.title_font,fg="#263942", anchor="center")
@@ -142,7 +153,7 @@ class PageTwo(tk.Frame):
         tk.Label(self, text="Choose methods used in feature classification:").grid(row=1)
         self.method_classify_var = tk.StringVar(value=self.controller.activate_classify_method)
         self.methods_menu = tk.OptionMenu(self, self.method_classify_var, *classify_methods_chooser, command=self.change_method_classify)
-        self.methods_menu.grid(row=2)
+        self.methods_menu.grid(row=2, column=0)
         self.face_reg_btn = tk.Button(self, text="Recognitize", command=lambda:self.recognitize())
         self.face_reg_btn.grid(row=3, column=0)
         self.buttoncanc = tk.Button(self, text="Cancel", bg="#ffffff", fg="#263942", command=lambda:self.cancel())
@@ -165,11 +176,15 @@ class PageTwo(tk.Frame):
 class PageThree(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=3)
+        self.rowconfigure(2, weight=1)
         self.controller = controller
         self.show_opt = False
-        icon_1 = PhotoImage(file=r'storage\something\question.png')
-        icon_2 = PhotoImage(file=r'storage\something\restore.png')
-        icon_3 = PhotoImage(file=r'storage\something\graph.png')
+        # icon_1 = PhotoImage(file=r'storage\something\question.png')
+        # icon_2 = PhotoImage(file=r'storage\something\restore.png')
+        # icon_3 = PhotoImage(file=r'storage\something\graph.png')
         self.label = tk.Label(self, text="Training", font=self.controller.title_font,fg="#263942", anchor="center")
         self.label.grid(row=0, column=0)
         self.notebook = Notebook(self)
@@ -177,17 +192,24 @@ class PageThree(tk.Frame):
         self.tab1 = tk.Frame(self.notebook)
         self.tab2 = tk.Frame(self.notebook)
         self.tab3 = tk.Frame(self.notebook)
-        self.notebook.add(self.tab1, text="Train Model", compound=tk.TOP)
+        self.tab2.columnconfigure(0, weight=1)
+        self.tab2.rowconfigure(0, weight=1)
+        self.tab3.columnconfigure(0, weight=1)
+        self.tab3.rowconfigure(0, weight=1)
+        self.tab3.rowconfigure(0, weight=1)
+        self.tab3.rowconfigure(1, weight=1)
+        self.tab3.rowconfigure(2, weight=1)
+        # self.notebook.add(self.tab1, text="Train Model", compound=tk.TOP)
         self.notebook.add(self.tab2, text="Create Feature Dataset", compound=tk.TOP)
         self.notebook.add(self.tab3, text="Train Classify", compound=tk.TOP)
         self.back_btn = tk.Button(self, text="Back", bg="#ffffff", fg="#263942", command=lambda:self.cancel())
-        self.back_btn.grid(row=3)
+        self.back_btn.grid(row=2)
         # Train model panel
         self.train_btn = tk.Button(self.tab1, text="Train Model", fg="#ffffff", bg="#263942",command=lambda:self.train_model())
-        self.train_btn.grid(row=0)
+        self.train_btn.grid(row=0, column=0)
         self.adv_label = ttk.Label(self.tab1, text="Advanced")
         self.adv_label.bind("<Button-1>", lambda e:self.hide_show_opt())
-        self.adv_label.grid(row=1)
+        self.adv_label.grid(row=1, column=0)
         self.adv_frame = tk.Frame(self.tab1)
         self.adv_frame.grid_forget()
         tk.Label(self.adv_frame, text="Epochs:").grid(row=0, column=0)
@@ -206,10 +228,10 @@ class PageThree(tk.Frame):
         self.lr_input.grid(row=2, column=1)
         self.defaults_label = tk.Label(self.adv_frame, text="Reset defaults")
         self.defaults_label.bind("<Button-1>", lambda e:self.reset_defaults())       
-        self.defaults_label.grid(row=3)
+        self.defaults_label.grid(row=3, column=0)
         self.underthehood_label = tk.Label(self.adv_frame, text="Under the hood")
         self.underthehood_label.bind("<Button-1>", lambda e:self.under_the_hood())     
-        self.underthehood_label.grid(row=4)
+        self.underthehood_label.grid(row=4, column=0)
         # Create feature dataset panel
         self.create_ds = tk.Button(self.tab2, text="Create Feature Dataset", command=lambda:self.create_f_ds())
         self.create_ds.grid(row=0)
@@ -566,7 +588,8 @@ class PageSix(tk.Frame):
         self.controller.delete_user()
         self.controller.activate_name = None
         self.controller.frames["PageFour"].refresh_names()
-        self.webcam_.destroy()
+        if self.webcam_:
+            self.webcam_.destroy()
         self.controller.show_frame("PageFive")
     
     def remove_all_samples(self):
@@ -706,6 +729,15 @@ class PageSix(tk.Frame):
 class webcam(tk.Toplevel):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+        self.columnconfigure(3, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
         self.controller = controller
         self.title('Webcam')
         self.mode = None
@@ -736,11 +768,11 @@ class webcam(tk.Toplevel):
         self.dropdown = tk.OptionMenu(self, self.menuvar, *input_chosser)
         self.dropdown.config(bg="lightgrey")
         self.dropdown["menu"].config(bg="lightgrey") 
-        tk.Label(self,text="Choose method to detect face:").grid(row=1)
+        tk.Label(self,text="Choose method to detect face:").grid(row=1, column=0, columnspan=4)
         global activate_face_detect_method
         self.detect_method_var = tk.StringVar(value=activate_face_detect_method)
         self.detect_method_menu = tk.OptionMenu(self, self.detect_method_var, *face_detect_methods_chooser, command=self.detect_method)
-        self.detect_method_menu.grid(row=2)
+        self.detect_method_menu.grid(row=2, column=0, columnspan=4)
         self.update()
 
     def detect_method(self, event):
@@ -751,22 +783,22 @@ class webcam(tk.Toplevel):
         self.mode = mode
         self.menuvar.set('Webcam')
         if mode == "PageFour":
-            self.input.grid(row=0, column=0)
-            self.toggle_btn.grid(row=0, column=2)
-            self.status.grid(row=0, column=3)
-            self.dropdown.grid(row=0, column=4)
-            self.btn_snapshot.grid(row=4, column=0, columnspan=5)
+            self.input.grid(row=0, column=0, sticky='W')
+            self.toggle_btn.grid(row=0, column=1, sticky='W')
+            self.status.grid(row=0, column=2, sticky='W')
+            self.dropdown.grid(row=0, column=3, sticky='E')
+            self.btn_snapshot.grid(row=4, column=0, columnspan=4)
         if mode == "PageSix":
-            self.input.grid(row=0, column=0)
-            self.toggle_btn.grid(row=0, column=2)
-            self.status.grid(row=0, column=3)
+            self.input.grid(row=0, column=0, sticky='W')
+            self.toggle_btn.grid(row=0, column=1, sticky='W')
+            self.status.grid(row=0, column=2, sticky='W')
             self.dropdown.grid_forget()
-            self.btn_snapshot.grid(row=4, column=0, columnspan=5)
+            self.btn_snapshot.grid(row=4, column=0, columnspan=4)
         if mode == "PageTwo":
-            self.input.grid(row=0, column=0)
-            self.toggle_btn.grid(row=0, column=2)
-            self.status.grid(row=0, column=3)
-            self.dropdown.grid(row=0, column=4)
+            self.input.grid(row=0, column=0, sticky='W')
+            self.toggle_btn.grid(row=0, column=1, sticky='W')
+            self.status.grid(row=0, column=2, sticky='W')
+            self.dropdown.grid(row=0, column=3, sticky='E')
             self.btn_snapshot.grid_forget()
 
     def switch(self):
@@ -977,15 +1009,25 @@ class webcam(tk.Toplevel):
         # print(self.controller.activate_classify_method)
         if self.controller.activate_classify_method == "Euclidean Distance":
             label, dist = euclidean_dist_classify(face_pixels)
-            # if min_dist > 0.45:
-            #     label = 'Unknown'
-            show = 'User : %s \n Dist: %.3f' % (label, dist)
+            if dist > 1.0:
+                label = 'Unknown'
+                show = 'User : %s' % (label)
+            else:
+                show = 'User : %s \n Dist: %.3f' % (label, dist)
         elif self.controller.activate_classify_method == "Cosine Similarity":
             label, prob = cosine_similarity_classify(face_pixels)
-            show = 'User : %s \n Prob: %.1f' % (label, prob) + '%'
+            if prob < 90.0:
+                label = 'Unknown'
+                show = 'User : %s' % (label)
+            else:
+                show = 'User : %s \n Prob: %.1f' % (label, prob) + '%'
         elif self.controller.activate_classify_method == "SVM":
             label, prob = svm_classify(face_pixels)
-            show = 'User : %s \n Prob: %.1f' % (label, prob) + '%'
+            if prob < 90.0:
+                label = 'Unknown'
+                show = 'User : %s' % (label)
+            else:
+                show = 'User : %s \n Prob: %.1f' % (label, prob) + '%'
         elif self.controller.activate_classify_method == "KNN":
             label = knn_classify(face_pixels)
             show = 'User : %s' % (label)
