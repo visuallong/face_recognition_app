@@ -25,7 +25,7 @@ batch_size_chooser = [24, 48, 96, 288, 576]
 input_chosser = ['Webcam', 'File']
 classify_methods_chooser = ['Euclidean Distance', 'Cosine Similarity', 'SVM', 'KNN']
 face_detect_methods_chooser = ['Dlib-HOG', 'Dlib-CNN', 'MTCNN', 'HaarCascades']
-activate_face_detect_method = 'MTCNN'
+activate_face_detect_method = 'Dlib-HOG'
 
 class MainUI(tk.Tk):
     def __init__(self, *args, **kwargs):
